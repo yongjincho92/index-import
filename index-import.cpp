@@ -127,8 +127,11 @@ void getUnitPathForOutputFile(StringRef unitsPath, StringRef filePath,
   StringRef fname = sys::path::filename(absPath);
   str.append(fname.begin(), fname.end());
   str.push_back('-');
+  errs() << "before absPath : " << absPath << "\n";
   clangPathRemapper.remapPath(absPath);
+  errs() << "after absPath : " << absPath << "\n";
   llvm::hash_code pathHashVal = llvm::hash_value(absPath);
+  errs() << "pathHashVal for " << absPath << " --> " << pathHashVal << "\n";
   llvm::APInt(64, pathHashVal).toString(str, 36, /*Signed=*/false);
 }
 
@@ -451,9 +454,11 @@ static bool remapIndex(const Remapper &remapper,
     FileSystemOptions fsOpts;
     FileManager fileMgr{fsOpts};
     for (auto &path : RemapFilePaths) {
+      errs() << "iterating on remapFilePath " << path << "\n";
       SmallString<256> outPath;
       getUnitPathForOutputFile(unitDirectory, normalizePath(path), outPath,
                                clangPathRemapper, fileMgr);
+      errs() << "unit path for output file " << path << " --> " << outPath << " \n";
       handleUnitPath(outPath.c_str(), outputRecordsDirectory, fileMgr);
     }
     return success;
